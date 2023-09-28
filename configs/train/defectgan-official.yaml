@@ -1,0 +1,99 @@
+PROJECT_NAME: DefectGAN
+EXP_NAME: defect_gan-official
+
+SEED: 0
+MIXING_PRECISION: True
+DEVICE: "cuda:0"
+CUDNN_BENCHMARK: True
+
+MODEL:
+  G:
+    NAME: "defectnet"
+
+    IN_CHANNELS: 3
+    OUT_CHANNELS: 3
+    CHANNELS: 64
+    NUM_BLOCKS: 6
+    NUM_DOWN_BLOCKS: 3
+    NOISE_IMAGE_SIZE: 224
+    NUM_SPATIAL_LAYERS: 2
+
+    SPECTRAL_NORM: True
+    EMA: True
+    COMPILED: True
+  D:
+    NAME: "path_discriminator"
+
+    IN_CHANNELS: 3
+    OUT_CHANNELS: 1
+    CHANNELS: 64
+    NUM_BLOCKS: 6
+    IMAGE_SIZE: 224
+    NUM_CLASSES: 2
+
+    SPECTRAL_NORM: True
+    EMA: False
+    COMPILED: False
+
+  EMA:
+    DECAY: 0.999
+    COMPILED: True
+
+  CHECKPOINT:
+    PRETRAINED_G_MODEL_WEIGHTS_PATH: ""
+    PRETRAINED_D_MODEL_WEIGHTS_PATH: ""
+
+    RESUME_G_MODEL_WEIGHTS_PATH: ""
+    RESUME_D_MODEL_WEIGHTS_PATH: ""
+
+TRAIN:
+  DATASET:
+    ROOT_DIR: "./data/ours_datasets"
+
+  HYP:
+    EPOCHS: 10
+
+    IMGS_PER_BATCH: 1
+    SHUFFLE: True
+    NUM_WORKERS: 4
+    PIN_MEMORY: True
+    DROP_LAST: True
+    PERSISTENT_WORKERS: True
+
+  LOSSES:
+    REC_CRITERION:
+      NAME: "l1"
+    CLS_CRITERION:
+      NAME: "cross_entropy"
+    GP_CRITERION:
+      NAME: "gradient_penalty"
+    LAMBDA:
+      G_GP_LOSS_WEIGHT: [ 1 ]
+      G_FAKE_CLS_LOSS_WEIGHT: [ 10 ]
+      G_REC_LOSS_WEIGHT: [ 3 ]
+      G_CYCLE_REC_LOSS_WEIGHT: [ 10 ]
+      G_CYCLE_MASK_REC_LOSS_WEIGHT: [ 10 ]
+      G_CYCLE_MASK_VANISHING_LOSS_WEIGHT: [ 3 ]
+      G_CYCLE_SPATIAL_LOSS_WEIGHT: [ 5 ]
+
+      D_GP_LOSS_WEIGHT: [ 1 ]
+      D_REAL_CLS_LOSS_WEIGHT: [ 5 ]
+
+  OPTIMIZER:
+    G:
+      NAME: "adam"
+      LR: 0.0001
+      BETAS: [ 0.0, 0.9 ]
+    D:
+      NAME: "adam"
+      LR: 0.0001
+      BETAS: [ 0.0, 0.9 ]
+
+  PRINT_FREQ: 100
+
+
+
+
+
+
+
